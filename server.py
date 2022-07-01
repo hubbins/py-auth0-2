@@ -1,5 +1,3 @@
-# 📁 server.py -----
-
 import json
 import os
 from os import environ as env
@@ -14,10 +12,10 @@ ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
 
-app = Flask(__name__)
-app.secret_key = env.get("APP_SECRET_KEY")
+app: Flask = Flask(__name__)
+app.secret_key: str = env.get("APP_SECRET_KEY")
 
-oauth = OAuth(app)
+oauth: OAuth = OAuth(app)
 
 oauth.register(
     "auth0",
