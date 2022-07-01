@@ -32,9 +32,10 @@ oauth.register(
 
 @app.route("/login")
 def login():
-    scheme = "http" if os.getenv("REPLIT") == "0" else "https"
     return oauth.auth0.authorize_redirect(
-        redirect_uri=url_for("callback", _external=True, _scheme=scheme)
+        redirect_uri=url_for(
+            "callback", _external=True, _scheme=os.getenv("URL_SCHEME")
+        )
     )
 
 
@@ -48,7 +49,6 @@ def callback():
 
 @app.route("/logout")
 def logout():
-    scheme = "http" if os.getenv("REPLIT") == "0" else "https"
     session.clear()
     return redirect(
         "https://"
@@ -56,7 +56,9 @@ def logout():
         + "/v2/logout?"
         + urlencode(
             {
-                "returnTo": url_for("home", _external=True, _scheme=scheme),
+                "returnTo": url_for(
+                    "home", _external=True, _scheme=os.getenv("URL_SCHEME")
+                ),
                 "client_id": env.get("AUTH0_CLIENT_ID"),
             },
             quote_via=quote_plus,
@@ -74,7 +76,4 @@ def home():
 
 
 if __name__ == "__main__":
-    if env.get("REPLIT") == "0":
-        app.run(host="0.0.0.0", port=env.get("PORT", 3000))
-    else:
-        app.run(host="0.0.0.0", port=int(os.getenv("PORT")))
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT")))
