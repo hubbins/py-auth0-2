@@ -1,6 +1,7 @@
 # 📁 server.py -----
 
 import json
+import os
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 
@@ -71,4 +72,7 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=env.get("PORT", 3000))
+    if env.get("REPLIT") == "0":
+        app.run(host="0.0.0.0", port=env.get("PORT", 3000))
+    else:
+        app.run(host="0.0.0.0", port=int(os.getenv("PORT")))
