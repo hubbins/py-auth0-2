@@ -1,5 +1,4 @@
 import json
-import os
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 
@@ -31,9 +30,7 @@ oauth.register(
 @app.route("/login")
 def login():
     return oauth.auth0.authorize_redirect(
-        redirect_uri=url_for(
-            "callback", _external=True, _scheme=os.getenv("URL_SCHEME")
-        )
+        redirect_uri=url_for("callback", _external=True, _scheme=env.get("URL_SCHEME"))
     )
 
 
@@ -55,7 +52,7 @@ def logout():
         + urlencode(
             {
                 "returnTo": url_for(
-                    "home", _external=True, _scheme=os.getenv("URL_SCHEME")
+                    "home", _external=True, _scheme=env.get("URL_SCHEME")
                 ),
                 "client_id": env.get("AUTH0_CLIENT_ID"),
             },
@@ -74,4 +71,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT")))
+    app.run(host="0.0.0.0", port=int(env.get("PORT")))
