@@ -11,3 +11,8 @@ Start a virtual environment shell and run:
 poetry shell
 python server.py
 ```
+
+To export requirements.txt:
+```bash
+poetry export --without-hashes -f requirements.txt > requirements.txt
+```
