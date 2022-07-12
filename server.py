@@ -5,6 +5,7 @@ from urllib.parse import quote_plus, urlencode
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, redirect, render_template, session, url_for, request, make_response, redirect
+import requests
 
 
 ENV_FILE = find_dotenv()
@@ -67,12 +68,16 @@ def logout():
 
 @app.route("/")
 def home():
-    return render_template(
-        "home.html",
-        #session=session.get("userinfo"),
-        session = session.get("access_token")
-        #pretty=json.dumps(session.get("userinfo"), indent=4),
-    )
+  access_token = session.get("access_token")
+  if access_token:
+    userinfo = requests.get(f"https://{env.get('AUTH0_DOMAIN')}/userinfo",params={"access_token": access_token}).content
+    print(userinfo)
+  return render_template(
+      "home.html",
+      #session=session.get("userinfo"),
+      session = access_token
+      #pretty=json.dumps(session.get("userinfo"), indent=4),
+  )
 
 @app.route("/verify")
 def verify():
