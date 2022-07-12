@@ -17,6 +17,7 @@ app.secret_key: str = env.get("APP_SECRET_KEY")
 
 oauth: OAuth = OAuth(app)
 
+# registration info common to all apps
 oauth.register(
     "auth0",
     client_id=env.get("AUTH0_CLIENT_ID"),
@@ -28,13 +29,35 @@ oauth.register(
 )
 
 
+###################################  
+# only used in login app
+###################################  
+@app.route("/")
+def home():
+  access_token = session.get("access_token")
+  if access_token:
+    userinfo = requests.get(f"https://{env.get('AUTH0_DOMAIN')}/userinfo",params={"access_token": access_token}).content
+    print(userinfo)
+  return render_template(
+      "home.html",
+      #session=session.get("userinfo"),
+      session = access_token
+      #pretty=json.dumps(session.get("userinfo"), indent=4),
+  )
+
+
+###################################  
+# only used in login app
+###################################  
 @app.route("/login")
 def login():
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("callback", _external=True, _scheme=env.get("URL_SCHEME"))
     )
 
-
+###################################  
+# only used in login app
+###################################  
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
     token = oauth.auth0.authorize_access_token()
@@ -46,7 +69,9 @@ def callback():
     session["access_token"] = token["access_token"]
     return redirect("/")
 
-
+###################################  
+# only used in login app
+###################################  
 @app.route("/logout")
 def logout():
     session.clear()
@@ -66,19 +91,9 @@ def logout():
     )
 
 
-@app.route("/")
-def home():
-  access_token = session.get("access_token")
-  if access_token:
-    userinfo = requests.get(f"https://{env.get('AUTH0_DOMAIN')}/userinfo",params={"access_token": access_token}).content
-    print(userinfo)
-  return render_template(
-      "home.html",
-      #session=session.get("userinfo"),
-      session = access_token
-      #pretty=json.dumps(session.get("userinfo"), indent=4),
-  )
-
+###################################  
+# only used in verify step app
+###################################  
 @app.route("/verify")
 def verify():
   # save state in cookie
@@ -97,6 +112,9 @@ def verify():
 
   return resp
 
+###################################  
+# only used in verify step app
+###################################  
 @app.route("/verify-continue")
 def verify_continue():
   # retrieve state and /continue
