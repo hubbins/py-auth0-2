@@ -4,7 +4,7 @@ from urllib.parse import quote_plus, urlencode
 
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask, redirect, render_template, session, url_for, request, make_response, redirect
 
 
 ENV_FILE = find_dotenv()
@@ -37,8 +37,12 @@ def login():
 @app.route("/callback", methods=["GET", "POST"])
 def callback():
     token = oauth.auth0.authorize_access_token()
-    print(token["userinfo"])
-    session["userinfo"] = token["userinfo"]
+    print(token)
+    #print(token["access_token"])
+    #userinfo = oauth.auth0.userinfo()
+    #print(userinfo)
+    #session["userinfo"] = token["userinfo"]
+    session["access_token"] = token["access_token"]
     return redirect("/")
 
 
@@ -65,9 +69,38 @@ def logout():
 def home():
     return render_template(
         "home.html",
-        session=session.get("userinfo"),
-        pretty=json.dumps(session.get("userinfo"), indent=4),
+        #session=session.get("userinfo"),
+        session = session.get("access_token")
+        #pretty=json.dumps(session.get("userinfo"), indent=4),
     )
+
+@app.route("/verify")
+def verify():
+  # save state in cookie
+  state = request.args.get("state")
+  #print("state: " + state)
+  
+  resp = make_response(render_template(
+    "verify.html",
+    continue_url = url_for(
+      "verify_continue", _external=True,
+      _scheme=env.get("URL_SCHEME")
+    )
+  ))
+
+  resp.set_cookie("verify_state", state)
+
+  return resp
+
+@app.route("/verify-continue")
+def verify_continue():
+  # retrieve state and /continue
+  state = request.cookies.get("verify_state")
+  #print("second state: " + state)
+
+  continue_uri = f"https://{env.get('AUTH0_DOMAIN')}/continue?state={state}"
+
+  return redirect(continue_uri, code=302)
 
 
 if __name__ == "__main__":

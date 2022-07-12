@@ -7,7 +7,7 @@
 
 <body>
     {% if session %}
-    <h1>Welcome {{session["name"]}}!</h1>
+    <h1>Welcome {{session}}!</h1>
     <p><a href="/logout" id="qsLogoutBtn">Logout</a></p>
     <div>
         <pre>{{pretty}}</pre>
