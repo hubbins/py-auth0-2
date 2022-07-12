@@ -100,7 +100,11 @@ def verify_continue():
 
   continue_uri = f"https://{env.get('AUTH0_DOMAIN')}/continue?state={state}"
 
-  return redirect(continue_uri, code=302)
+  resp = make_response(redirect(continue_uri, code=302))
+  
+  resp.delete_cookie("verify_state")
+  
+  return resp
 
 
 if __name__ == "__main__":
